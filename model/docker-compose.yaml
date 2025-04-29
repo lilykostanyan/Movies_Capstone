@@ -1,0 +1,43 @@
+services:
+
+  elasticsearch:
+      container_name: elasticsearch
+      image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+      restart: always
+      ports:
+        - "9200:9200"
+      environment:
+        - discovery.type=single-node
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+        interval: 100s
+        timeout: 50s
+        retries: 10
+      volumes:
+        - esdata:/usr/share/elasticsearch/data
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana-oss:7.10.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  etl:
+    container_name: etl
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./jsons:/etl/jsons
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: "exit 0"
+
+volumes:
+  esdata:

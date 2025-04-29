@@ -1,0 +1,6 @@
+elasticsearch
+pandas
+openpyxl
+numpy
+python-dateutil
+python-dotenv
